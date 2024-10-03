@@ -1,5 +1,8 @@
 <?php
 
+use PhpParser\Node\Expr;
+use PhpParser\Node\Stmt;
+
 # Start logging:
 LogMore::open('jugglecode');
 LogMore::debug('Including JuggleCode PHP Manipulation Tool');
@@ -401,7 +404,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 	 *
 	 * Handles the inclusion of script-files.
 	 */
-	public function pExpr_Include(PhpParser\Node\Expr\Include_ $node) {
+    protected function pExpr_Include(Expr\Include_ $node) {
 		$file_to_include = $node->expr->value;
 
 		if ($file_to_include && $this->mergeScripts ||
@@ -410,8 +413,8 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 			LogMore::debug('File to include: %s', $file_to_include);
 
 			# If the file should be only included/required once
-			if ( 	$node->type == PhpParser\Node\Expr\Include_::TYPE_INCLUDE_ONCE ||
-				$node->type == PhpParser\Node\Expr\Include_::TYPE_REQUIRE_ONCE)
+			if ( 	$node->type == Expr\Include_::TYPE_INCLUDE_ONCE ||
+				$node->type == Expr\Include_::TYPE_REQUIRE_ONCE)
 			{
 				# If the file has already been included
 				if (isset($this->includedFiles[$file_to_include])) {
@@ -443,8 +446,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 	 *
 	 * Handles the printing of function calls.
 	 */
-	public function pExpr_FuncCall(PhpParser\Node\Expr\FuncCall $node) {
-		$code = null;
+    protected function pExpr_FuncCall(Expr\FuncCall $node) {
 		$functionName = $this->p($node->name);
 		LogMore::debug('Name of function to call: %s', $functionName);
 
@@ -476,7 +478,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 	}
 
 
-	public function pStmt_Function(PhpParser\Node\Stmt\Function_ $node) {
+    protected function pStmt_Function(Stmt\Function_ $node) {
 		$code = null;
 		$functionName = $node->name;
 
@@ -530,7 +532,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 	 *
 	 * Handles the printing of method calls.
 	 */
-	public function pExpr_MethodCall(PhpParser\Node\Expr\MethodCall $node) {
+    protected function pExpr_MethodCall(Expr\MethodCall $node) {
         $instance = $this->p($node);
 		$method = $this->pObjectProperty($node->name);
 		LogMore::debug('Name of method and instance to call: %s, %s',
@@ -551,7 +553,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 	 *
 	 * Handles the printing of static method calls.
 	 */
-	public function pExpr_StaticCall(PhpParser\Node\Expr\StaticCall $node) {
+    protected function pExpr_StaticCall(Expr\StaticCall $node) {
         # Get class and method name:
 		$class = $this->p($node->class);
 		$method = $node->name;
@@ -568,7 +570,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 		return $code;
 	}
 
-	public function pStmt_InlineHTML(PhpParser\Node\Stmt\InlineHTML $node) {
+    protected function pStmt_InlineHTML(Stmt\InlineHTML $node) {
 		++$this->inlineHTMLBlocksCount;
 		return parent::pStmt_InlineHTML($node);
 	}
