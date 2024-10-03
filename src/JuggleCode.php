@@ -2,6 +2,7 @@
 
 use PhpParser\Node\Expr;
 use PhpParser\Node\Stmt;
+use PhpParser\ParserFactory;
 
 # Start logging:
 LogMore::open('jugglecode');
@@ -207,7 +208,9 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 	/**
 	 * Just for the statistics in the testmode yet...
 	 */
-	public function getIncludedFiles() { return $this->includedFiles; }
+    public function getIncludedFiles(): array {
+        return $this->includedFiles;
+    }
 
 
 	/**
@@ -402,7 +405,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 	 *
 	 * Handles the inclusion of script-files.
 	 */
-    protected function pExpr_Include(Expr\Include_ $node) {
+    protected function pExpr_Include(Expr\Include_ $node, int $precedence, int $lhsPrecedence): string {
 		$file_to_include = $node->expr->value;
 
 		if ($file_to_include && $this->mergeScripts ||
@@ -419,7 +422,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 					LogMore::debug('File has already been included once');
 
 					# Leave function
-					return null;
+					return '';
 				}
 			}
 
@@ -434,7 +437,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 
 			return $code;
 		} else {
-			return parent::pExpr_Include($node);
+			return parent::pExpr_Include($node, $precedence, $lhsPrecedence);
 		}
 	}
 
@@ -444,7 +447,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 	 *
 	 * Handles the printing of function calls.
 	 */
-    protected function pExpr_FuncCall(Expr\FuncCall $node) {
+    protected function pExpr_FuncCall(Expr\FuncCall $node): string {
 		$functionName = $this->p($node->name);
 		LogMore::debug('Name of function to call: %s', $functionName);
 
@@ -476,7 +479,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 	}
 
 
-    protected function pStmt_Function(Stmt\Function_ $node) {
+    protected function pStmt_Function(Stmt\Function_ $node): string {
 		$code = null;
 		$functionName = $node->name;
 
@@ -530,7 +533,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 	 *
 	 * Handles the printing of method calls.
 	 */
-    protected function pExpr_MethodCall(Expr\MethodCall $node) {
+    protected function pExpr_MethodCall(Expr\MethodCall $node): string {
         $instance = $this->p($node->var);
 		$method = $this->pObjectProperty($node->name);
 		LogMore::debug('Name of method and instance to call: %s, %s',
@@ -551,7 +554,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 	 *
 	 * Handles the printing of static method calls.
 	 */
-    protected function pExpr_StaticCall(Expr\StaticCall $node) {
+    protected function pExpr_StaticCall(Expr\StaticCall $node): string {
         # Get class and method name:
 		$class = $this->p($node->class);
 		$method = (string)$node->name;
@@ -568,7 +571,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 		return $code;
 	}
 
-    protected function pStmt_InlineHTML(Stmt\InlineHTML $node) {
+    protected function pStmt_InlineHTML(Stmt\InlineHTML $node): string {
 		++$this->inlineHTMLBlocksCount;
 		return parent::pStmt_InlineHTML($node);
 	}
@@ -610,9 +613,9 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 	 *
 	 * 	true - When all statements got parsed and the outfile 
 	 * 		was written
-	 * 	false - When an error occured
+	 * 	false - When an error occurred
 	 */
-	public function run() {
+	public function run(): bool {
 		$rc = false;
 
 		if ($this->masterfile) {
@@ -655,7 +658,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 	 *
 	 * 	The pretty-printed PHP code
 	 */
-	private function parseFile($file) {
+	private function parseFile($file): string {
 		LogMore::debug('Should parse file %s', $file);
 		$fileDirectory = dirname($file);
 		LogMore::info('File directory: %s', $fileDirectory);
@@ -681,13 +684,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 		}
 
 		# Create Parser
-        $lexer = new PhpParser\Lexer\Emulative(['usedAttributes' => [
-            'startLine', 'endLine', 'startFilePos', 'endFilePos', 'comments'
-        ]]);
-        $parser = (new PhpParser\ParserFactory)->create(
-            PhpParser\ParserFactory::PREFER_PHP7,
-            $lexer
-        );
+        $parser = (new ParserFactory())->createForHostVersion();
 
 		# Create syntax tree
 		$syntax_tree = $parser->parse($statements);
@@ -744,7 +741,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 	 * gets undefined, probably others -- only used within those
 	 * ghost functions -- will follow.
 	 */
-	public function getGhostFunctions() {
+	public function getGhostFunctions(): array {
 		return array_diff(
 			$this->definedFunctions,
 			array_keys($this->calledFunctions));

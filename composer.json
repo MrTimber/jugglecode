@@ -11,8 +11,8 @@
 		}
 	],
 	"require" : {
-		"php" : ">=7.0",
-		"nikic/php-parser" : "^4.0",
+		"php" : ">=7.4",
+		"nikic/php-parser" : "^5.0",
 		"mrtimber/logmore" : "dev-main"
 	},
 	"autoload": {
