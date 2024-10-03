@@ -56,10 +56,9 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 	 * into the outfile.
 	 * There are three possibilities running JuggleCode:
 	 * - Do not merge files at all
-	 * 	In this case, both $mergeScripts and $filesToMerge 
-	 * 	is set to false
+	 * 	$mergeScripts = false, $filesToMerge is an empty array
 	 * - Do merge all files
-	 * 	$mergeScripts = true, $filesToMerge = false
+	 * 	$mergeScripts = true, $filesToMerge is an empty array
 	 * - Do only merge given files
 	 * 	$mergeScripts = false, $filesToMerge = array('file1', 'file2')
 	 */
@@ -194,7 +193,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 		$this->outfile = $outfile;
 		$this->comments = true;
 		$this->mergeScripts = false;
-		$this->filesToMerge = false;
+		$this->filesToMerge = [];
 
 		$this->includedFiles =
 		$this->definedFunctions =
@@ -263,17 +262,20 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 		$this->oppressedFunctionCalls[] = $function;
 	}
 
-	
-	/**
-	 * Function: oppressMethodCall
-	 */
-	public function oppressMethodCall($instanceOrClass, $method) {
-		return $this->saveMethodHandling(
-			self::JC_OPPRESS,
-			$instanceOrClass,
-			$method,
-			$expression);
-	}
+
+    /**
+     * Function: oppressMethodCall
+     * @param $instanceOrClass
+     * @param $method
+     * @param $expression
+     */
+    public function oppressMethodCall($instanceOrClass, $method, $expression = null) {
+        $this->saveMethodHandling(
+            self::JC_OPPRESS,
+            $instanceOrClass,
+            $method,
+            $expression);
+    }
 
 
 	/**
@@ -299,7 +301,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 	 * 	$expression - Expression to replace the function-call with
 	 */
 	public function replaceMethodCall($instanceName, $method, $expression) {
-		return $this->saveMethodHandling(
+		$this->saveMethodHandling(
 			self::JC_REPLACE,
 			$instanceName,
 			$method,
@@ -370,10 +372,6 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 	 * Function: mergeFile 
 	 */
 	public function mergeFile($file) {
-		if (!is_array($this->filesToMerge)) {
-			$this->filesToMerge = array();
-		}
-
 		$this->filesToMerge[] = $file;
 	}
 
@@ -413,7 +411,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 			LogMore::debug('File to include: %s', $file_to_include);
 
 			# If the file should be only included/required once
-			if ( 	$node->type == Expr\Include_::TYPE_INCLUDE_ONCE ||
+			if ($node->type == Expr\Include_::TYPE_INCLUDE_ONCE ||
 				$node->type == Expr\Include_::TYPE_REQUIRE_ONCE)
 			{
 				# If the file has already been included
@@ -556,7 +554,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
     protected function pExpr_StaticCall(Expr\StaticCall $node) {
         # Get class and method name:
 		$class = $this->p($node->class);
-		$method = $node->name;
+		$method = (string)$node->name;
 		LogMore::debug('Name of static method and class to call: %s, %s',
 			$method,
 			$class);
