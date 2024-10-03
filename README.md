@@ -4,7 +4,6 @@
 
 JuggleCode is a tool to manipulate PHP statements in scriptfiles.
 
-
 # Features
 
 JuggleCode can:
@@ -13,6 +12,10 @@ JuggleCode can:
 - Remove comments from PHP files
 - Oppress or replace function and method calls in PHP scripts
 
+# Branches
+
+- branch 2.x => uses PHP Parser 5.x: for running on PHP >= 7.4; for parsing PHP 7.0 to PHP 8.4, with limited support for parsing PHP 5.x
+- branch 1.x => uses PHP Parser 4.x: for running on PHP >= 7.0; for parsing PHP 5.2 to PHP 8.3
 
 # Usage
 

@@ -17,6 +17,12 @@ JuggleCode can:
 - Oppress or replace function and method calls in PHP scripts
 
 
+Title: Branches
+
+- branch 2.x => uses PHP Parser 5.x: for running on PHP >= 7.4; for parsing PHP 7.0 to PHP 8.4, with limited support for parsing PHP 5.x
+- branch 1.x => uses PHP Parser 4.x: for running on PHP >= 7.0; for parsing PHP 5.2 to PHP 8.3
+
+
 Title: Usage
 
 JuggleCode always expects a PHP script as input. The output is redirected to stdout per default, but can get captured to a file.
