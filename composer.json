@@ -1,0 +1,23 @@
+{
+	"name" : "mrtimber/jugglecode",
+	"description" : "A tool to manipulate PHP statements in scriptfiles",
+	"license" : "CC-BY-SA-3.0",
+	"keywords" : ["deploy","join","one-file","prettyprint","manipulate"],
+	"homepage" : "https://www.github.com/mrtimber/jugglecode",
+	"repositories": [
+		{
+			"type": "vcs",
+			"url": "https://github.com/MrTimber/logmore"
+		}
+	],
+	"require" : {
+		"php" : ">=5.6",
+		"nikic/php-parser" : ">=4.0",
+		"mrtimber/logmore" : "dev-main"
+	},
+	"autoload": {
+		"psr-0": {
+			"JuggleCode": "src"
+		}
+	}
+}
