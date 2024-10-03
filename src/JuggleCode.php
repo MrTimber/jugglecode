@@ -531,8 +531,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 	 * Handles the printing of method calls.
 	 */
 	public function pExpr_MethodCall(PhpParser\Node\Expr\MethodCall $node) {
-		$code = null;
-		$instance = $this->pVarOrNewExpr($node->var);
+        $instance = $this->p($node);
 		$method = $this->pObjectProperty($node->name);
 		LogMore::debug('Name of method and instance to call: %s, %s',
 			$method,
@@ -553,9 +552,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 	 * Handles the printing of static method calls.
 	 */
 	public function pExpr_StaticCall(PhpParser\Node\Expr\StaticCall $node) {
-		$code = null;
-
-		# Get class and method name:
+        # Get class and method name:
 		$class = $this->p($node->class);
 		$method = $node->name;
 		LogMore::debug('Name of static method and class to call: %s, %s',
