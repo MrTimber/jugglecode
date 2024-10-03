@@ -7,7 +7,7 @@ LogMore::debug('Including JuggleCode PHP Manipulation Tool');
 /**
  * Class: JuggleCode
  */
-class JuggleCode extends PHPParser_PrettyPrinter_Zend {
+class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 
 	/**
 	 * Constants: Callhandling
@@ -385,11 +385,11 @@ class JuggleCode extends PHPParser_PrettyPrinter_Zend {
 	 * 	If comments are enabled, the comments get returned.
 	 * 	If comments are disabled, null is returned
 	 */
-	public function pComments(array $comments) {
+    protected function pComments(array $comments) : string {
 		if ($this->comments) {
 			$comments = parent::pComments($comments);
 		} else {
-			$comments = null;
+			$comments = '';
 		}
 
 		return $comments;
@@ -401,7 +401,7 @@ class JuggleCode extends PHPParser_PrettyPrinter_Zend {
 	 *
 	 * Handles the inclusion of script-files.
 	 */
-	public function pExpr_Include(PHPParser_Node_Expr_Include $node) {
+	public function pExpr_Include(PhpParser\Node\Expr\Include_ $node) {
 		$file_to_include = $node->expr->value;
 
 		if ($file_to_include && $this->mergeScripts ||
@@ -410,8 +410,8 @@ class JuggleCode extends PHPParser_PrettyPrinter_Zend {
 			LogMore::debug('File to include: %s', $file_to_include);
 
 			# If the file should be only included/required once
-			if ( 	$node->type == PHPParser_Node_Expr_Include::TYPE_INCLUDE_ONCE ||
-				$node->type == PHPParser_Node_Expr_Include::TYPE_REQUIRE_ONCE)
+			if ( 	$node->type == PhpParser\Node\Expr\Include_::TYPE_INCLUDE_ONCE ||
+				$node->type == PhpParser\Node\Expr\Include_::TYPE_REQUIRE_ONCE)
 			{
 				# If the file has already been included
 				if (isset($this->includedFiles[$file_to_include])) {
@@ -443,7 +443,7 @@ class JuggleCode extends PHPParser_PrettyPrinter_Zend {
 	 *
 	 * Handles the printing of function calls.
 	 */
-	public function pExpr_FuncCall(PHPParser_Node_Expr_FuncCall $node) {
+	public function pExpr_FuncCall(PhpParser\Node\Expr\FuncCall $node) {
 		$code = null;
 		$functionName = $this->p($node->name);
 		LogMore::debug('Name of function to call: %s', $functionName);
@@ -476,7 +476,7 @@ class JuggleCode extends PHPParser_PrettyPrinter_Zend {
 	}
 
 
-	public function pStmt_Function(PHPParser_Node_Stmt_Function $node) {
+	public function pStmt_Function(PhpParser\Node\Stmt\Function_ $node) {
 		$code = null;
 		$functionName = $node->name;
 
@@ -530,7 +530,7 @@ class JuggleCode extends PHPParser_PrettyPrinter_Zend {
 	 *
 	 * Handles the printing of method calls.
 	 */
-	public function pExpr_MethodCall(PHPParser_Node_Expr_MethodCall $node) {
+	public function pExpr_MethodCall(PhpParser\Node\Expr\MethodCall $node) {
 		$code = null;
 		$instance = $this->pVarOrNewExpr($node->var);
 		$method = $this->pObjectProperty($node->name);
@@ -552,7 +552,7 @@ class JuggleCode extends PHPParser_PrettyPrinter_Zend {
 	 *
 	 * Handles the printing of static method calls.
 	 */
-	public function pExpr_StaticCall(PHPParser_Node_Expr_StaticCall $node) {
+	public function pExpr_StaticCall(PhpParser\Node\Expr\StaticCall $node) {
 		$code = null;
 
 		# Get class and method name:
@@ -571,7 +571,7 @@ class JuggleCode extends PHPParser_PrettyPrinter_Zend {
 		return $code;
 	}
 
-	public function pStmt_InlineHTML(PHPParser_Node_Stmt_InlineHTML $node) {
+	public function pStmt_InlineHTML(PhpParser\Node\Stmt\InlineHTML $node) {
 		++$this->inlineHTMLBlocksCount;
 		return parent::pStmt_InlineHTML($node);
 	}
@@ -684,7 +684,13 @@ class JuggleCode extends PHPParser_PrettyPrinter_Zend {
 		}
 
 		# Create Parser
-		$parser = new PHPParser_Parser(new PHPParser_Lexer);
+        $lexer = new PhpParser\Lexer\Emulative(['usedAttributes' => [
+            'startLine', 'endLine', 'startFilePos', 'endFilePos', 'comments'
+        ]]);
+        $parser = (new PhpParser\ParserFactory)->create(
+            PhpParser\ParserFactory::PREFER_PHP7,
+            $lexer
+        );
 
 		# Create syntax tree
 		$syntax_tree = $parser->parse($statements);
