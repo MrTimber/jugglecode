@@ -533,7 +533,7 @@ class JuggleCode extends PhpParser\PrettyPrinter\Standard {
 	 * Handles the printing of method calls.
 	 */
     protected function pExpr_MethodCall(Expr\MethodCall $node) {
-        $instance = $this->p($node);
+        $instance = $this->p($node->var);
 		$method = $this->pObjectProperty($node->name);
 		LogMore::debug('Name of method and instance to call: %s, %s',
 			$method,
